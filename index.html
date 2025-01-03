@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic Tac Toe</title>
+  <style>
+    body{
+      background-color: #3a43f4;
+      color: white;
+    }
+    #game {
+      text-align: center;
+      font-family: Arial, sans-serif;
+      /* background-color: aquamarine; */
+    }
+    #board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-gap: 5px;
+      justify-content: center;
+      margin: 20px auto;
+    }
+    .cell {
+      width: 100px;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #725959;
+      font-size: 24px;
+      cursor: pointer;
+      background-color: #f9f9f9;
+      transition: background-color 0.3s;
+    }
+    .cell:hover {
+      background-color: #e0e0e0;
+    }
+    .cell.taken {
+      cursor: not-allowed;
+      background-color: rgb(245, 58, 220);
+    }
+    .cell.winner {
+      background-color: #34df34;
+    }
+    #reset {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+    #reset:hover {
+      background-color: #45a049;
+    }
+    #status {
+      margin-top: 15px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div id="game">
+    <h1>Tic Tac Toe</h1>
+    <div id="board"></div>
+    <button id="reset">Restart Game</button>
+    <div id="status"></div>
+  </div>
+
+  <script>
+    const boardElement = document.getElementById('board');
+    const resetButton = document.getElementById('reset');
+    const statusElement = document.getElementById('status');
+
+    // Game state
+    let board = Array(9).fill(null);
+    let currentPlayer = 'X';
+    let gameActive = true;
+
+    // Winning combinations
+    const winningCombinations = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8],
+      [0, 3, 6], [1, 4, 7], [2, 5, 8],
+      [0, 4, 8], [2, 4, 6]
+    ];
+
+    // Initialize board
+    function initializeBoard() {
+      boardElement.innerHTML = '';
+      board.forEach((_, index) => {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.dataset.index = index;
+        cell.addEventListener('click', handleCellClick);
+        boardElement.appendChild(cell);
+      });
+      statusElement.textContent = `Current Player: ${currentPlayer}`;
+    }
+
+    // Handle cell click
+    function handleCellClick(event) {
+      const cell = event.target;
+      const index = cell.dataset.index;
+
+      if (board[index] || !gameActive) return;
+
+      board[index] = currentPlayer;
+      cell.textContent = currentPlayer;
+      cell.classList.add('taken');
+
+      if (checkWin()) {
+        statusElement.textContent = `${currentPlayer} wins!`;
+        highlightWinningCells();
+        gameActive = false;
+      } else if (board.every(cell => cell)) {
+        statusElement.textContent = 'Its a tie!';
+        gameActive = false;
+      } else {
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        statusElement.textContent = `Current Player: ${currentPlayer}`;
+      }
+    }
+
+    // Check for a win
+    function checkWin() {
+      return winningCombinations.some(combination => {
+        const [a, b, c] = combination;
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+          combination.forEach(index => {
+            document.querySelector(`.cell[data-index='${index}']`).classList.add('winner');
+          });
+          return true;
+        }
+        return false;
+      });
+    }
+
+    // Reset the game
+    resetButton.addEventListener('click', () => {
+      board = Array(9).fill(null);
+      currentPlayer = 'X';
+      gameActive = true;
+      initializeBoard();
+    });
+
+    // Start the game
+    initializeBoard();
+  </script>
+</body>
+</html>
